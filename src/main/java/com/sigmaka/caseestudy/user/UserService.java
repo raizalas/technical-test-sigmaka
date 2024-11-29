@@ -1,7 +1,6 @@
 package com.sigmaka.caseestudy.user;
 
 import com.sigmaka.caseestudy.auth.AuthService;
-import com.sigmaka.caseestudy.auth.UserDetailsImpl;
 import com.sigmaka.caseestudy.user.dto.LoginDto;
 import com.sigmaka.caseestudy.user.dto.LoginResponse.JwtToken;
 import com.sigmaka.caseestudy.user.dto.RegisterDto;
@@ -29,13 +28,12 @@ public class UserService {
   }
 
   public JwtToken login(LoginDto dto) {
-    Authentication auth = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-        dto.email(), dto.password()
-    ));
+    Authentication auth = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+            dto.email(), dto.password()
+        ));
 
     SecurityContextHolder.getContext().setAuthentication(auth);
-
-    UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
 
     String token = authService.generateToken(auth);
 
