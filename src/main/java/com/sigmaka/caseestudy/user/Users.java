@@ -1,5 +1,6 @@
 package com.sigmaka.caseestudy.user;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,6 +19,7 @@ public class Users {
 
   @Email
   @NotBlank
+  @Column(unique = true)
   private String email;
 
   @NotBlank

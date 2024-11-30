@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +26,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -35,9 +37,13 @@ public class SecurityConfig {
 
   private final RsaKeyConfigProperties rsa;
 
-  public SecurityConfig(JpaUserDetailsService userDetailsService, RsaKeyConfigProperties rsa) {
+  private final RateLimitingFilter rateLimitingFilter;
+
+  public SecurityConfig(JpaUserDetailsService userDetailsService, RsaKeyConfigProperties rsa,
+      RateLimitingFilter rateLimitingFilter) {
     this.userDetailsService = userDetailsService;
     this.rsa = rsa;
+    this.rateLimitingFilter = rateLimitingFilter;
   }
 
   @Bean
@@ -54,6 +60,25 @@ public class SecurityConfig {
                 .jwtAuthenticationConverter(jwtAuthenticationConverter())))
         .userDetailsService(userDetailsService)
         .httpBasic(Customizer.withDefaults())
+        .exceptionHandling(exceptionHandler ->
+            exceptionHandler
+                .authenticationEntryPoint((
+                        request,
+                        response,
+                        authException) -> {
+                      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                      response.getWriter().write(authException.getMessage());
+                    }
+                )
+                .accessDeniedHandler((
+                    request,
+                    response,
+                    accessDeniedException) -> {
+                  response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                  response.getWriter().write(accessDeniedException.getMessage());
+                })
+        )
+        .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
   }
 

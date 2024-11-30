@@ -31,7 +31,7 @@ public class UserController {
   }
 
 
-  @PostMapping("/registeer")
+  @PostMapping("/register")
   public ResponseEntity<ApiResponse<Users>> register(@RequestBody RegisterDto registerDto) {
 
     Users register = userService.register(registerDto);
