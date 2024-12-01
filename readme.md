@@ -65,7 +65,7 @@ Konfigurasi ini digunakan untuk basis data, ganti sesuai dengan server postgres 
 # Rate Limit Amount
 api.rate.limit.amount=100
 
-# Rate Limit Duration in minutes
+# Rate Limit Duration in seconds
 api.rate.limit.duration=1
 ```
 
