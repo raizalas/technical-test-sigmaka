@@ -50,7 +50,8 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     return http.csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> {
-          auth.requestMatchers("/login", "/register").permitAll();
+          auth.requestMatchers("/login", "/register", "/api-docs/**", "/swagger-ui/**")
+              .permitAll();
           auth.anyRequest().authenticated();
         })
         .sessionManagement(

@@ -14,17 +14,24 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 @Component
 public class RateLimitingFilter implements Filter {
 
+  @Value("${api.rate.limit.amount}")
+  private int tokenAmount;
+
+  @Value("${api.rate.limit.duration}")
+  private long tokenDuration;
+
   private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
 
   private Bucket createBucket() {
-    Refill refill = Refill.greedy(10, Duration.ofMinutes(1));
-    Bandwidth limit = Bandwidth.classic(10, refill);
+    Refill refill = Refill.greedy(tokenAmount, Duration.ofMinutes(tokenDuration));
+    Bandwidth limit = Bandwidth.classic(tokenAmount, refill);
     return Bucket.builder().addLimit(limit).build();
 
   }
